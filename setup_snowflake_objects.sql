@@ -19,7 +19,9 @@ CREATE SCHEMA IF NOT EXISTS REPORTING
 USE SCHEMA REPORTING;
 
 -- Create internal stage for storing generated PowerPoint files
+-- ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE') ensures files work correctly with pre-signed URLs
 CREATE STAGE IF NOT EXISTS PPT_STAGE
+    ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE')
     DIRECTORY = (ENABLE = TRUE)
     COMMENT = 'Internal stage for storing generated PowerPoint presentations';
 

@@ -15,7 +15,7 @@ Use this checklist to ensure proper deployment of the PowerPoint generation syst
 - [ ] Execute `setup_snowflake_objects.sql`
 - [ ] Verify database `POWERPOINT_DB` created
 - [ ] Verify schema `REPORTING` created
-- [ ] Verify stage `PPT_STAGE` created
+- [ ] Verify stage `PPT_STAGE` created **with SNOWFLAKE_SSE encryption**
 - [ ] Verify warehouse `REPORTING_WH` created (or using existing)
 - [ ] Verify table `ACCOUNTS` created with sample data
 
@@ -25,7 +25,14 @@ SHOW DATABASES LIKE 'POWERPOINT_DB';
 SHOW SCHEMAS IN DATABASE POWERPOINT_DB;
 SHOW STAGES IN SCHEMA POWERPOINT_DB.REPORTING;
 SHOW TABLES IN SCHEMA POWERPOINT_DB.REPORTING;
+
+-- CRITICAL: Verify stage has SNOWFLAKE_SSE encryption
+DESC STAGE POWERPOINT_DB.REPORTING.PPT_STAGE;
+-- Look for: encryption_type = SNOWFLAKE_SSE
 ```
+
+**If stage doesn't have SNOWFLAKE_SSE encryption:**
+- Run `fix_existing_stage.sql` to recreate the stage properly
 
 ### 2. Stored Procedure Setup
 - [ ] Execute `create_powerpoint_procedure.sql`

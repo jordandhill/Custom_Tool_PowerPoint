@@ -270,6 +270,7 @@ def generate_ppt(session: Session, account_id_input: str) -> str:
         prs.save(local_file_path)
         
         # Upload file to stage (will keep the filename)
+        # Note: Even with auto_compress=False, Snowflake may compress for internal storage
         put_result = session.file.put(
             local_file_path,
             "@PPT_STAGE",
@@ -281,15 +282,30 @@ def generate_ppt(session: Session, account_id_input: str) -> str:
         os.unlink(local_file_path)
         os.rmdir(temp_dir)
         
-        # Generate pre-signed URL using the stage filename
+        # Check if Snowflake added .gz extension (it sometimes does internally)
+        # List files in stage to see actual stored name
+        list_query = f"""
+            LIST @PPT_STAGE PATTERN='.*{stage_file_name}.*'
+        """
+        list_result = session.sql(list_query).collect()
+        
+        # Extract actual filename from stage (could be compressed as .gz)
+        actual_stage_filename = stage_file_name
+        if len(list_result) > 0:
+            # Get the filename from the 'name' column (format: 'ppt_stage/filename')
+            stage_path_full = list_result[0]['name']
+            actual_stage_filename = stage_path_full.split('/')[-1]
+        
+        # Generate pre-signed URL using the actual stage filename
+        # With SNOWFLAKE_SSE encryption, pre-signed URLs should work correctly
         presigned_url_query = f"""
-            SELECT GET_PRESIGNED_URL(@PPT_STAGE, '{stage_file_name}', 86400) AS URL
+            SELECT GET_PRESIGNED_URL(@PPT_STAGE, '{actual_stage_filename}', 86400) AS URL
         """
         
         url_result = session.sql(presigned_url_query).collect()
         presigned_url = url_result[0]['URL']
         
-        return f"PowerPoint generated successfully for '{account_name}'! File: {stage_file_name} | Download URL (valid for 24 hours): {presigned_url}"
+        return f"PowerPoint generated successfully for '{account_name}'! File: {actual_stage_filename} | Download URL (valid for 24 hours): {presigned_url}"
         
     except Exception as e:
         return f"Error generating PowerPoint: {str(e)}"

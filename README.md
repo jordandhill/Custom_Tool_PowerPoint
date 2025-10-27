@@ -94,7 +94,9 @@ USE WAREHOUSE REPORTING_WH;
 CALL GENERATE_ACCOUNT_POWERPOINT('ACC001');
 ```
 
-**Output**: Returns a pre-signed URL valid for 24 hours for downloading the generated PowerPoint.
+**Output**: Returns a pre-signed URL (valid for 24 hours) that you can paste directly into your browser to download the PowerPoint file.
+
+**Note**: The stage uses `SNOWFLAKE_SSE` encryption, which ensures pre-signed URLs work correctly with binary files like PowerPoint presentations.
 
 ### View Available Accounts
 
@@ -316,6 +318,17 @@ This project is provided as-is for use within your Snowflake environment.
 
 ## Version History
 
+- **v1.0.4** (2024-10-27): **CRITICAL FIX - Stage encryption**
+  - **Added `ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE')` to stage creation** - This fixes the file corruption issue!
+  - SNOWFLAKE_SSE encryption ensures pre-signed URLs serve files correctly
+  - Simplified stored procedure output (pre-signed URLs now work properly)
+  - If you already created the stage, you must recreate it with the encryption parameter
+- **v1.0.3** (2024-10-27): Download method improvements
+  - Documented internal stage compression limitations
+  - Added SnowSQL download instructions as primary method
+  - Included troubleshooting guides (IMMEDIATE_FIX.md, TROUBLESHOOTING_FILE_CORRUPTION.md)
+  - Updated procedure to return SnowSQL command for easy downloads
+  - Added external stage migration guide for production use
 - **v1.0.2** (2024-10-27): Filename and corruption fixes
   - Fixed file corruption issue caused by incorrect filename reference
   - Updated filename format to use account name + datetime (e.g., Acme_Corporation_20241027_120000.pptx)

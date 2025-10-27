@@ -8,8 +8,10 @@ Execute in Snowflake:
 
 ```sql
 -- Copy and paste contents of setup_snowflake_objects.sql
--- This creates database, schema, stage, and sample data
+-- This creates database, schema, stage (with SNOWFLAKE_SSE encryption), and sample data
 ```
+
+**Important**: If you previously created the stage without `SNOWFLAKE_SSE` encryption, run `fix_existing_stage.sql` to recreate it properly.
 
 ## Step 2: Create Procedure (1 minute)
 
@@ -84,7 +86,11 @@ Custom_Tool_PowerPoint/
 ├── QUICK_START.md                     # This file
 ├── setup_snowflake_objects.sql        # Step 1: Database setup
 ├── create_powerpoint_procedure.sql    # Step 2: Procedure creation
-└── example_usage.sql                  # Step 3: Usage examples
+├── example_usage.sql                  # Step 3: Usage examples
+├── fix_existing_stage.sql             # Fix for existing stages (if needed)
+├── IMMEDIATE_FIX.md                   # Troubleshooting guide
+├── TROUBLESHOOTING_FILE_CORRUPTION.md # Detailed corruption fixes
+└── DEPLOYMENT_CHECKLIST.md            # Production deployment guide
 ```
 
 ---

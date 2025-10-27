@@ -11,8 +11,6 @@ Execute in Snowflake:
 -- This creates database, schema, stage (with SNOWFLAKE_SSE encryption), and sample data
 ```
 
-**Important**: If you previously created the stage without `SNOWFLAKE_SSE` encryption, run `fix_existing_stage.sql` to recreate it properly.
-
 ## Step 2: Create Procedure (1 minute)
 
 Execute in Snowflake:
@@ -82,15 +80,14 @@ SELECT * FROM ACCOUNTS;
 
 ```
 Custom_Tool_PowerPoint/
-├── README.md                          # Full documentation
-├── QUICK_START.md                     # This file
-├── setup_snowflake_objects.sql        # Step 1: Database setup
-├── create_powerpoint_procedure.sql    # Step 2: Procedure creation
-├── example_usage.sql                  # Step 3: Usage examples
-├── fix_existing_stage.sql             # Fix for existing stages (if needed)
-├── IMMEDIATE_FIX.md                   # Troubleshooting guide
-├── TROUBLESHOOTING_FILE_CORRUPTION.md # Detailed corruption fixes
-└── DEPLOYMENT_CHECKLIST.md            # Production deployment guide
+├── README.md                               # Full documentation
+├── QUICK_START.md                          # This file
+├── setup_snowflake_objects.sql             # Step 1: Database setup
+├── create_powerpoint_procedure.sql         # Step 2: Procedure creation
+├── example_usage.sql                       # Step 3: Usage examples
+├── snowflake_intelligence_integration.sql  # Snowflake Intelligence agent setup
+├── streamlit_integration.py                # Streamlit app for UI
+└── PERMISSIONS_GUIDE.md                    # Complete permissions reference
 ```
 
 ---
@@ -121,12 +118,35 @@ REMOVE @PPT_STAGE/account_ACC001_20241027_120000.pptx;
 
 ---
 
+## Advanced Integration
+
+### Snowflake Intelligence Agents
+Run `snowflake_intelligence_integration.sql` to:
+- Set up agent permissions
+- Create Snowflake Intelligence database structure
+- Get step-by-step instructions for adding as custom tool
+
+### Streamlit App
+Deploy `streamlit_integration.py` to Snowflake for:
+- User-friendly UI
+- Account selection dropdown
+- One-click PowerPoint generation
+- Automatic download links
+
 ## Need Help?
 
 See the full [README.md](README.md) for:
 - Detailed architecture
+- Snowflake Intelligence integration
+- Streamlit deployment
 - Customization guide
 - Troubleshooting
 - Security considerations
 - Advanced usage examples
+
+See [PERMISSIONS_GUIDE.md](PERMISSIONS_GUIDE.md) for:
+- Complete permissions reference
+- Troubleshooting permission issues
+- Security best practices
+- Verification scripts
 

@@ -34,23 +34,60 @@ CREATE WAREHOUSE IF NOT EXISTS REPORTING_WH
     INITIALLY_SUSPENDED = TRUE
     COMMENT = 'Warehouse for reporting and PowerPoint generation';
 
+-- ============================================================================
+-- Create Role for PowerPoint Generation Access
+-- ============================================================================
+
+-- Create dedicated role for Snowflake Intelligence agents and authorized users
+CREATE ROLE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_RL
+    COMMENT = 'Role for users authorized to generate PowerPoint presentations via Snowflake Intelligence';
+
 -- Grant necessary permissions (adjust as needed for your security model)
--- Note: These are example grants - adjust according to your security requirements
+-- Note: Using a specific role instead of PUBLIC for better security
 
 -- Grant usage on database
 GRANT USAGE ON DATABASE POWERPOINT_DB TO ROLE SYSADMIN;
+GRANT USAGE ON DATABASE POWERPOINT_DB TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
 
 -- Grant usage on schema
 GRANT USAGE ON SCHEMA POWERPOINT_DB.REPORTING TO ROLE SYSADMIN;
+GRANT USAGE ON SCHEMA POWERPOINT_DB.REPORTING TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
 
--- Grant read/write on stage
+-- Grant read/write on stage (required for PowerPoint file storage)
 GRANT READ, WRITE ON STAGE POWERPOINT_DB.REPORTING.PPT_STAGE TO ROLE SYSADMIN;
+GRANT READ, WRITE ON STAGE POWERPOINT_DB.REPORTING.PPT_STAGE TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
 
 -- Grant usage on warehouse
 GRANT USAGE ON WAREHOUSE REPORTING_WH TO ROLE SYSADMIN;
+GRANT USAGE ON WAREHOUSE REPORTING_WH TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
+
+-- Grant select on tables (for agents to read account data)
+GRANT SELECT ON TABLE POWERPOINT_DB.REPORTING.ACCOUNTS TO ROLE SYSADMIN;
+GRANT SELECT ON TABLE POWERPOINT_DB.REPORTING.ACCOUNTS TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
 
 -- Grant execute on future procedures
 GRANT USAGE ON FUTURE PROCEDURES IN SCHEMA POWERPOINT_DB.REPORTING TO ROLE SYSADMIN;
+GRANT USAGE ON FUTURE PROCEDURES IN SCHEMA POWERPOINT_DB.REPORTING TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
+
+-- ============================================================================
+-- Grant Role to Users
+-- ============================================================================
+
+-- Grant the role to specific users who should have access
+-- Uncomment and modify the following lines to grant to specific users:
+-- GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO USER <username1>;
+-- GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO USER <username2>;
+
+-- Or grant to another role (role hierarchy)
+-- GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO ROLE <parent_role>;
+
+-- Example: Grant to SYSADMIN for testing
+GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO ROLE SYSADMIN;
+
+-- Display information about the created role
+SELECT 'SNOWFLAKE_INTELLIGENCE_RL role created successfully!' AS STATUS;
+SELECT 'Grant this role to users who should access PowerPoint generation:' AS INFO;
+SELECT '  GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO USER <username>;' AS COMMAND;
 
 -- Create a sample accounts table (for demonstration purposes)
 CREATE TABLE IF NOT EXISTS ACCOUNTS (

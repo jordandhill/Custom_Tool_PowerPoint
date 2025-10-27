@@ -51,10 +51,10 @@ Run the setup script to create all necessary objects:
 
 This creates:
 - Database and schema
-- Internal stage for file storage
+- Internal stage for file storage (with SNOWFLAKE_SSE encryption)
 - Sample accounts table with test data
 - Warehouse for processing
-- Necessary permissions
+- Necessary permissions for users, agents, and Streamlit apps
 
 ### Step 2: Create the Stored Procedure
 
@@ -294,6 +294,87 @@ session.sql(f"SELECT SYSTEM$LOG('DEBUG', 'Processing account: {account_id_input}
 3. **Stage Storage**: Internal stages included in storage costs
 4. **Pre-signed URLs**: No additional cost for URL generation
 
+## Snowflake Intelligence Integration
+
+You can integrate this PowerPoint generator as a custom tool in Snowflake Intelligence agents. See the [Snowflake Intelligence documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-intelligence) for details.
+
+### Required Permissions for Agents
+
+According to [Snowflake's documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-intelligence), agents use the user's default role and warehouse. 
+
+**The system uses a dedicated role:** `SNOWFLAKE_INTELLIGENCE_RL`
+
+This role is automatically created by the setup script with all required permissions:
+- **USAGE** on `POWERPOINT_DB` database
+- **USAGE** on `POWERPOINT_DB.REPORTING` schema  
+- **READ, WRITE** on `PPT_STAGE` stage (required for file generation)
+- **USAGE** on `REPORTING_WH` warehouse
+- **SELECT** on `ACCOUNTS` table
+- **USAGE** on `GENERATE_ACCOUNT_POWERPOINT` procedure
+
+**To grant access to a user:**
+```sql
+GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO USER <username>;
+ALTER USER <username> SET DEFAULT_ROLE = SNOWFLAKE_INTELLIGENCE_RL;
+```
+
+### Setup Instructions
+
+Run the integration script:
+```sql
+-- Execute: snowflake_intelligence_integration.sql
+```
+
+This script:
+- Grants necessary permissions
+- Creates Snowflake Intelligence database structure
+- Provides step-by-step instructions for creating the agent
+- Includes troubleshooting queries
+
+### Creating the Agent
+
+1. Navigate to **Snowsight** → **AI & ML** → **Agents**
+2. Select **Create agent**
+3. Choose **Snowflake Intelligence** platform
+4. Add the stored procedure as a **custom tool**
+5. Configure warehouse: `REPORTING_WH`
+6. Set planning instructions for when to use the tool
+7. **Grant access to `SNOWFLAKE_INTELLIGENCE_RL` role** (critical for security)
+
+**Important**: Only users with the `SNOWFLAKE_INTELLIGENCE_RL` role can use the agent.
+
+Users with the role can then ask:
+- "Create a PowerPoint for account ACC001"
+- "Generate a presentation for Acme Corporation"
+
+## Streamlit Integration
+
+A complete Streamlit app is provided for user-friendly PowerPoint generation.
+
+### Features
+- Account selection dropdown
+- Account details display
+- One-click PowerPoint generation
+- Pre-signed URL for direct download
+- SnowSQL command fallback
+- Error handling and troubleshooting
+
+### Deployment
+
+1. Upload `streamlit_integration.py` to Snowflake Streamlit
+2. Select `REPORTING_WH` as the warehouse
+3. Grant required permissions (automatically set by setup script)
+4. Run the app
+
+### Required Permissions (Same as Agents)
+
+The Streamlit app requires users to have the `SNOWFLAKE_INTELLIGENCE_RL` role, which provides all necessary permissions to write to the stage and execute the stored procedure.
+
+Users must have the role granted:
+```sql
+GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO USER <username>;
+```
+
 ## Future Enhancements
 
 Potential improvements:
@@ -301,9 +382,10 @@ Potential improvements:
 - Support for multiple slides per account
 - Template-based generation for different report types
 - Email delivery of generated PowerPoints
-- Scheduled batch generation
+- Scheduled batch generation with Snowflake Tasks
 - Custom branding and logos
 - Export to other formats (PDF, Google Slides)
+- Integration with Snowflake Marketplace
 
 ## Support
 
@@ -318,6 +400,17 @@ This project is provided as-is for use within your Snowflake environment.
 
 ## Version History
 
+- **v1.0.6** (2024-10-27): **Role-Based Security Enhancement**
+  - Changed from PUBLIC role to dedicated `SNOWFLAKE_INTELLIGENCE_RL` role
+  - Enhanced security by limiting access to authorized users only
+  - Added user management commands and examples
+  - Updated all documentation to reflect role-based access control
+- **v1.0.5** (2024-10-27): **Snowflake Intelligence & Streamlit Integration**
+  - Added comprehensive Snowflake Intelligence agent integration guide
+  - Created `snowflake_intelligence_integration.sql` with permissions and setup
+  - Added complete Streamlit app (`streamlit_integration.py`) for UI-based generation
+  - Documented required permissions for agents and Streamlit to write to stage
+  - Added permission verification queries and troubleshooting steps
 - **v1.0.4** (2024-10-27): **CRITICAL FIX - Stage encryption**
   - **Added `ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE')` to stage creation** - This fixes the file corruption issue!
   - SNOWFLAKE_SSE encryption ensures pre-signed URLs serve files correctly

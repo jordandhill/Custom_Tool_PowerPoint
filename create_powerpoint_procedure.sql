@@ -50,7 +50,7 @@ def generate_ppt(session: Session, account_id_input: str) -> str:
             EMPLOYEES,
             INDUSTRY,
             CREATED_DATE
-        FROM ACCOUNTS
+        FROM POWERPOINT_DB.REPORTING.ACCOUNTS
         WHERE ACCOUNT_ID = '{account_id_input}'
     """
     
@@ -313,6 +313,21 @@ $$;
 
 -- Grant execute permission
 GRANT USAGE ON PROCEDURE GENERATE_ACCOUNT_POWERPOINT(VARCHAR) TO ROLE SYSADMIN;
+GRANT USAGE ON PROCEDURE GENERATE_ACCOUNT_POWERPOINT(VARCHAR) TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
 
 SELECT 'Stored procedure GENERATE_ACCOUNT_POWERPOINT created successfully!' AS STATUS;
+
+-- Display permissions information
+SELECT 'To use with Snowflake Intelligence agents or Streamlit:' AS INFO
+UNION ALL SELECT '1. Users must have SNOWFLAKE_INTELLIGENCE_RL role granted'
+UNION ALL SELECT '2. Users must set SNOWFLAKE_INTELLIGENCE_RL as their default role (or use it explicitly)'
+UNION ALL SELECT '3. Grant command: GRANT ROLE SNOWFLAKE_INTELLIGENCE_RL TO USER <username>;'
+UNION ALL SELECT ''
+UNION ALL SELECT 'The SNOWFLAKE_INTELLIGENCE_RL role has the following permissions:'
+UNION ALL SELECT '  - USAGE on POWERPOINT_DB database'
+UNION ALL SELECT '  - USAGE on POWERPOINT_DB.REPORTING schema'
+UNION ALL SELECT '  - READ, WRITE on PPT_STAGE stage'
+UNION ALL SELECT '  - USAGE on REPORTING_WH warehouse'
+UNION ALL SELECT '  - SELECT on ACCOUNTS table'
+UNION ALL SELECT '  - USAGE on GENERATE_ACCOUNT_POWERPOINT procedure';
 

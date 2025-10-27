@@ -9,7 +9,7 @@ USE DATABASE POWERPOINT_DB;
 USE SCHEMA REPORTING;
 
 -- Create a logging table for debug output
-CREATE TABLE IF NOT EXISTS DEBUG_LOGS (
+CREATE TABLE IF NOT EXISTS POWERPOINT_DB.REPORTING.DEBUG_LOGS (
     LOG_ID NUMBER AUTOINCREMENT PRIMARY KEY,
     PROCEDURE_NAME VARCHAR(200),
     LOG_TIMESTAMP TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
@@ -44,7 +44,7 @@ def log_debug(session: Session, level: str, message: str, account_id: str = None
     """Log debug information to DEBUG_LOGS table"""
     try:
         log_query = f"""
-            INSERT INTO DEBUG_LOGS (PROCEDURE_NAME, LOG_LEVEL, LOG_MESSAGE, ACCOUNT_ID, ERROR_DETAILS)
+            INSERT INTO POWERPOINT_DB.REPORTING.DEBUG_LOGS (PROCEDURE_NAME, LOG_LEVEL, LOG_MESSAGE, ACCOUNT_ID, ERROR_DETAILS)
             VALUES ('GENERATE_ACCOUNT_POWERPOINT_DEBUG', '{level}', '{message.replace("'", "''")}', 
                     '{account_id if account_id else "N/A"}', 
                     '{error_details.replace("'", "''") if error_details else "N/A"}')
@@ -89,7 +89,7 @@ def generate_ppt_debug(session: Session, account_id_input: str) -> str:
         # TEST 3: Check stage access (LIST)
         # ====================================================================
         try:
-            list_query = "LIST @PPT_STAGE"
+            list_query = "LIST @POWERPOINT_DB.REPORTING.PPT_STAGE"
             list_result = session.sql(list_query).collect()
             log_debug(session, "INFO", f"Stage LIST test: SUCCESS - Found {len(list_result)} files", account_id_input)
         except Exception as e:
@@ -196,7 +196,7 @@ def generate_ppt_debug(session: Session, account_id_input: str) -> str:
             
             put_result = session.file.put(
                 local_file_path,
-                "@PPT_STAGE",
+                "@POWERPOINT_DB.REPORTING.PPT_STAGE",
                 auto_compress=False,
                 overwrite=True
             )
@@ -217,7 +217,7 @@ def generate_ppt_debug(session: Session, account_id_input: str) -> str:
         # TEST 8: Verify file in stage
         # ====================================================================
         try:
-            list_query = f"LIST @PPT_STAGE PATTERN='.*{stage_file_name}.*'"
+            list_query = f"LIST @POWERPOINT_DB.REPORTING.PPT_STAGE PATTERN='.*{stage_file_name}.*'"
             list_result = session.sql(list_query).collect()
             
             if len(list_result) > 0:
@@ -246,7 +246,7 @@ def generate_ppt_debug(session: Session, account_id_input: str) -> str:
         # ====================================================================
         try:
             presigned_url_query = f"""
-                SELECT GET_PRESIGNED_URL(@PPT_STAGE, '{actual_stage_filename}', 86400) AS URL
+                SELECT GET_PRESIGNED_URL(@POWERPOINT_DB.REPORTING.PPT_STAGE, '{actual_stage_filename}', 86400) AS URL
             """
             
             url_result = session.sql(presigned_url_query).collect()
@@ -264,12 +264,12 @@ File: {actual_stage_filename}
 Download URL (valid for 24 hours): {presigned_url}
 
 DEBUG: All tests passed! Check DEBUG_LOGS table for detailed execution log.
-Query: SELECT * FROM DEBUG_LOGS WHERE ACCOUNT_ID = '{account_id_input}' ORDER BY LOG_TIMESTAMP DESC;"""
+Query: SELECT * FROM POWERPOINT_DB.REPORTING.DEBUG_LOGS WHERE ACCOUNT_ID = '{account_id_input}' ORDER BY LOG_TIMESTAMP DESC;"""
         
     except Exception as e:
         error_msg = str(e)
         log_debug(session, "CRITICAL", f"Unhandled exception: {error_msg}", account_id_input, error_msg)
-        return f"Critical Error: {error_msg}\n\nCheck DEBUG_LOGS table for details:\nSELECT * FROM DEBUG_LOGS WHERE ACCOUNT_ID = '{account_id_input}' ORDER BY LOG_TIMESTAMP DESC;"
+        return f"Critical Error: {error_msg}\n\nCheck DEBUG_LOGS table for details:\nSELECT * FROM POWERPOINT_DB.REPORTING.DEBUG_LOGS WHERE ACCOUNT_ID = '{account_id_input}' ORDER BY LOG_TIMESTAMP DESC;"
 $$;
 
 -- Grant execute permission
@@ -277,11 +277,11 @@ GRANT USAGE ON PROCEDURE GENERATE_ACCOUNT_POWERPOINT_DEBUG(VARCHAR) TO ROLE SYSA
 GRANT USAGE ON PROCEDURE GENERATE_ACCOUNT_POWERPOINT_DEBUG(VARCHAR) TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
 
 -- Grant access to debug logs table
-GRANT SELECT, INSERT ON TABLE DEBUG_LOGS TO ROLE SYSADMIN;
-GRANT SELECT, INSERT ON TABLE DEBUG_LOGS TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
+GRANT SELECT, INSERT ON TABLE POWERPOINT_DB.REPORTING.DEBUG_LOGS TO ROLE SYSADMIN;
+GRANT SELECT, INSERT ON TABLE POWERPOINT_DB.REPORTING.DEBUG_LOGS TO ROLE SNOWFLAKE_INTELLIGENCE_RL;
 
 SELECT 'Debug stored procedure GENERATE_ACCOUNT_POWERPOINT_DEBUG created successfully!' AS STATUS;
 SELECT 'Call with: CALL GENERATE_ACCOUNT_POWERPOINT_DEBUG(''ACC001'');' AS USAGE;
-SELECT 'View logs with: SELECT * FROM DEBUG_LOGS ORDER BY LOG_TIMESTAMP DESC LIMIT 20;' AS VIEW_LOGS;
+SELECT 'View logs with: SELECT * FROM POWERPOINT_DB.REPORTING.DEBUG_LOGS ORDER BY LOG_TIMESTAMP DESC LIMIT 20;' AS VIEW_LOGS;
 
 

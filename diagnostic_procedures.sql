@@ -29,14 +29,14 @@ def test_stage(session: Session) -> str:
     
     # Test 1: LIST stage
     try:
-        list_result = session.sql("LIST @PPT_STAGE").collect()
+        list_result = session.sql("LIST @POWERPOINT_DB.REPORTING.PPT_STAGE").collect()
         results.append(f"✓ LIST permission: SUCCESS - Found {len(list_result)} files")
     except Exception as e:
         results.append(f"✗ LIST permission: FAILED - {str(e)}")
     
     # Test 2: Describe stage
     try:
-        desc_result = session.sql("DESC STAGE PPT_STAGE").collect()
+        desc_result = session.sql("DESC STAGE POWERPOINT_DB.REPORTING.PPT_STAGE").collect()
         results.append(f"✓ DESCRIBE stage: SUCCESS")
         for row in desc_result:
             if 'encryption_type' in str(row).lower():
@@ -53,7 +53,7 @@ def test_stage(session: Session) -> str:
     
     # Test 4: Check stage grants
     try:
-        grants_result = session.sql("SHOW GRANTS ON STAGE PPT_STAGE").collect()
+        grants_result = session.sql("SHOW GRANTS ON STAGE POWERPOINT_DB.REPORTING.PPT_STAGE").collect()
         results.append(f"✓ Stage grants: {len(grants_result)} permissions found")
     except Exception as e:
         results.append(f"✗ Show grants: FAILED - {str(e)}")
@@ -129,7 +129,7 @@ def test_files(session: Session) -> str:
     try:
         put_result = session.file.put(
             test_file_path,
-            "@PPT_STAGE",
+            "@POWERPOINT_DB.REPORTING.PPT_STAGE",
             auto_compress=False,
             overwrite=True
         )
@@ -141,7 +141,7 @@ def test_files(session: Session) -> str:
     # Test 7: Verify file in stage
     try:
         filename = os.path.basename(test_file_path)
-        list_result = session.sql(f"LIST @PPT_STAGE PATTERN='.*{filename}.*'").collect()
+        list_result = session.sql(f"LIST @POWERPOINT_DB.REPORTING.PPT_STAGE PATTERN='.*{filename}.*'").collect()
         if len(list_result) > 0:
             results.append(f"✓ Verify in stage: SUCCESS - File found")
         else:
@@ -232,7 +232,7 @@ def test_pptx(session: Session) -> str:
     try:
         put_result = session.file.put(
             temp_file,
-            "@PPT_STAGE",
+            "@POWERPOINT_DB.REPORTING.PPT_STAGE",
             auto_compress=False,
             overwrite=True
         )
@@ -338,7 +338,7 @@ def test_workflow(session: Session, account_id_input: str) -> str:
     try:
         put_result = session.file.put(
             temp_file,
-            "@PPT_STAGE",
+            "@POWERPOINT_DB.REPORTING.PPT_STAGE",
             auto_compress=False,
             overwrite=True
         )
@@ -356,7 +356,7 @@ def test_workflow(session: Session, account_id_input: str) -> str:
     
     # Step 7: Verify in stage
     try:
-        list_result = session.sql(f"LIST @PPT_STAGE PATTERN='.*{filename}.*'").collect()
+        list_result = session.sql(f"LIST @POWERPOINT_DB.REPORTING.PPT_STAGE PATTERN='.*{filename}.*'").collect()
         if len(list_result) > 0:
             results.append(f"✓ Step 7 - Verify in stage: SUCCESS")
         else:
@@ -366,7 +366,7 @@ def test_workflow(session: Session, account_id_input: str) -> str:
     
     # Step 8: Generate pre-signed URL
     try:
-        url_query = f"SELECT GET_PRESIGNED_URL(@PPT_STAGE, '{filename}', 86400) AS URL"
+        url_query = f"SELECT GET_PRESIGNED_URL(@POWERPOINT_DB.REPORTING.PPT_STAGE, '{filename}', 86400) AS URL"
         url_result = session.sql(url_query).collect()
         url = url_result[0]['URL']
         results.append(f"✓ Step 8 - Generate URL: SUCCESS")
@@ -410,6 +410,6 @@ SELECT '  CALL TEST_COMPLETE_WORKFLOW(''ACC001'');' AS TEST_4;
 SELECT '' AS BLANK2;
 SELECT 'For debugging the main procedure, use:' AS DEBUG_INFO;
 SELECT '  CALL GENERATE_ACCOUNT_POWERPOINT_DEBUG(''ACC001'');' AS DEBUG_CMD;
-SELECT '  SELECT * FROM DEBUG_LOGS ORDER BY LOG_TIMESTAMP DESC LIMIT 20;' AS VIEW_LOGS;
+SELECT '  SELECT * FROM POWERPOINT_DB.REPORTING.DEBUG_LOGS ORDER BY LOG_TIMESTAMP DESC LIMIT 20;' AS VIEW_LOGS;
 
 

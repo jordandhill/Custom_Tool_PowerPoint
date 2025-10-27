@@ -273,7 +273,7 @@ def generate_ppt(session: Session, account_id_input: str) -> str:
         # Note: Even with auto_compress=False, Snowflake may compress for internal storage
         put_result = session.file.put(
             local_file_path,
-            "@PPT_STAGE",
+            "@POWERPOINT_DB.REPORTING.PPT_STAGE",
             auto_compress=False,
             overwrite=True
         )
@@ -285,7 +285,7 @@ def generate_ppt(session: Session, account_id_input: str) -> str:
         # Check if Snowflake added .gz extension (it sometimes does internally)
         # List files in stage to see actual stored name
         list_query = f"""
-            LIST @PPT_STAGE PATTERN='.*{stage_file_name}.*'
+            LIST @POWERPOINT_DB.REPORTING.PPT_STAGE PATTERN='.*{stage_file_name}.*'
         """
         list_result = session.sql(list_query).collect()
         
@@ -299,7 +299,7 @@ def generate_ppt(session: Session, account_id_input: str) -> str:
         # Generate pre-signed URL using the actual stage filename
         # With SNOWFLAKE_SSE encryption, pre-signed URLs should work correctly
         presigned_url_query = f"""
-            SELECT GET_PRESIGNED_URL(@PPT_STAGE, '{actual_stage_filename}', 86400) AS URL
+            SELECT GET_PRESIGNED_URL(@POWERPOINT_DB.REPORTING.PPT_STAGE, '{actual_stage_filename}', 86400) AS URL
         """
         
         url_result = session.sql(presigned_url_query).collect()

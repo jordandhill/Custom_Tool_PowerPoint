@@ -33,7 +33,7 @@ BEGIN
     FETCH account_cursor INTO account_id_var;
     WHILE (SQLCODE = 0) DO
         CALL GENERATE_ACCOUNT_POWERPOINT(:account_id_var) INTO :result_var;
-        INSERT INTO PPT_GENERATION_LOG (ACCOUNT_ID, RESULT, GENERATED_AT)
+        INSERT INTO POWERPOINT_DB.REPORTING.PPT_GENERATION_LOG (ACCOUNT_ID, RESULT, GENERATED_AT)
             VALUES (:account_id_var, :result_var, CURRENT_TIMESTAMP());
         FETCH account_cursor INTO account_id_var;
     END WHILE;
@@ -51,11 +51,11 @@ LIST @PPT_STAGE;
 -- ============================================================================
 
 -- List files and get a specific filename
-LIST @PPT_STAGE;
+LIST @POWERPOINT_DB.REPORTING.PPT_STAGE;
 
 -- Generate pre-signed URL for a specific file (replace with actual filename)
 -- Note: Filenames now use account name instead of account ID
--- SELECT GET_PRESIGNED_URL(@PPT_STAGE, 'Acme_Corporation_20241027_120000.pptx', 86400) AS DOWNLOAD_URL;
+-- SELECT GET_PRESIGNED_URL(@POWERPOINT_DB.REPORTING.PPT_STAGE, 'Acme_Corporation_20241027_120000.pptx', 86400) AS DOWNLOAD_URL;
 
 -- ============================================================================
 -- Example 5: Clean up old PowerPoint files (optional)
@@ -63,13 +63,13 @@ LIST @PPT_STAGE;
 
 -- Remove files older than 30 days
 -- Note: This is a manual cleanup example
--- REMOVE @PPT_STAGE PATTERN='.*\.pptx';
+-- REMOVE @POWERPOINT_DB.REPORTING.PPT_STAGE PATTERN='.*\.pptx';
 
 -- ============================================================================
 -- Optional: Create a log table to track PowerPoint generation
 -- ============================================================================
 
-CREATE TABLE IF NOT EXISTS PPT_GENERATION_LOG (
+CREATE TABLE IF NOT EXISTS POWERPOINT_DB.REPORTING.PPT_GENERATION_LOG (
     LOG_ID NUMBER AUTOINCREMENT PRIMARY KEY,
     ACCOUNT_ID VARCHAR(50),
     RESULT VARCHAR(1000),
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS PPT_GENERATION_LOG (
 );
 
 -- Query the log
-SELECT * FROM PPT_GENERATION_LOG ORDER BY GENERATED_AT DESC;
+SELECT * FROM POWERPOINT_DB.REPORTING.PPT_GENERATION_LOG ORDER BY GENERATED_AT DESC;
 
 -- ============================================================================
 -- Example 6: Error handling - Try with non-existent account
@@ -90,14 +90,14 @@ CALL GENERATE_ACCOUNT_POWERPOINT('INVALID_ACCOUNT');
 -- ============================================================================
 
 -- To download a file using SnowSQL command line:
--- GET @PPT_STAGE/Acme_Corporation_20241027_120000.pptx file:///path/to/local/directory;
+-- GET @POWERPOINT_DB.REPORTING.PPT_STAGE/Acme_Corporation_20241027_120000.pptx file:///path/to/local/directory;
 
 -- ============================================================================
 -- Example 8: View stage properties and configuration
 -- ============================================================================
 
-DESCRIBE STAGE PPT_STAGE;
+DESCRIBE STAGE POWERPOINT_DB.REPORTING.PPT_STAGE;
 
 -- Show stage details
-SHOW STAGES LIKE 'PPT_STAGE';
+SHOW STAGES LIKE 'PPT_STAGE' IN SCHEMA POWERPOINT_DB.REPORTING;
 

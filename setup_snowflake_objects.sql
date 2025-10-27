@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS ACCOUNTS (
 -- Insert sample data
 INSERT INTO ACCOUNTS (ACCOUNT_ID, ACCOUNT_NAME, ACCOUNT_TYPE, REVENUE, EMPLOYEES, INDUSTRY, CREATED_DATE)
 VALUES
-    ('ACC001', 'Acme Corporation', 'Enterprise', 5000000.00, 500, 'Technology', '2023-01-15'),
+    ('ACC001', 'Acme Corporation', 'Enterprise', 4000000.00, 500, 'Technology', '2023-01-15'),
     ('ACC002', 'Global Industries Inc', 'Mid-Market', 2500000.00, 250, 'Manufacturing', '2023-03-20'),
     ('ACC003', 'Tech Innovators LLC', 'Enterprise', 7500000.00, 750, 'Technology', '2022-11-10'),
     ('ACC004', 'Retail Solutions Co', 'Small Business', 500000.00, 50, 'Retail', '2024-01-05');

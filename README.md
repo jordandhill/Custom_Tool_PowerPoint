@@ -24,7 +24,7 @@ A comprehensive solution for generating stylized PowerPoint presentations from S
 
 2. **Stored Procedure**
    - Name: `GENERATE_ACCOUNT_POWERPOINT`
-   - Language: Python 3.8
+   - Language: Python 3.10
    - Dependencies: `snowflake-snowpark-python`, `python-pptx`
 
 3. **Generated PowerPoint Structure**
@@ -113,9 +113,10 @@ LIST @PPT_STAGE;
 For existing files in the stage:
 
 ```sql
+-- Note: Filenames use account name + datetime (e.g., Acme_Corporation_20241027_120000.pptx)
 SELECT GET_PRESIGNED_URL(
     @PPT_STAGE, 
-    'account_ACC001_20241027_120000.pptx', 
+    'Acme_Corporation_20241027_120000.pptx', 
     86400  -- 24 hours in seconds
 ) AS DOWNLOAD_URL;
 ```
@@ -189,8 +190,8 @@ print(f"Download URL: {download_url}")
 Clean up old files:
 
 ```sql
--- Remove specific file
-REMOVE @PPT_STAGE/account_ACC001_20241027_120000.pptx;
+-- Remove specific file (use actual account name in filename)
+REMOVE @PPT_STAGE/Acme_Corporation_20241027_120000.pptx;
 
 -- Remove all PowerPoint files (use with caution)
 REMOVE @PPT_STAGE PATTERN='.*\.pptx';
@@ -315,6 +316,12 @@ This project is provided as-is for use within your Snowflake environment.
 
 ## Version History
 
+- **v1.0.2** (2024-10-27): Filename and corruption fixes
+  - Fixed file corruption issue caused by incorrect filename reference
+  - Updated filename format to use account name + datetime (e.g., Acme_Corporation_20241027_120000.pptx)
+  - Improved file handling and cleanup
+- **v1.0.1** (2024-10-27): Python runtime update
+  - Updated to Python 3.10 runtime (3.8 is decommissioned)
 - **v1.0.0** (2024-10-27): Initial release
   - Basic PowerPoint generation
   - Three-slide template

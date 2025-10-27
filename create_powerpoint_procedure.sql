@@ -12,7 +12,7 @@ USE SCHEMA REPORTING;
 CREATE OR REPLACE PROCEDURE GENERATE_ACCOUNT_POWERPOINT(ACCOUNT_ID_INPUT VARCHAR)
 RETURNS VARCHAR
 LANGUAGE PYTHON
-RUNTIME_VERSION = '3.8'
+RUNTIME_VERSION = '3.10'
 PACKAGES = ('snowflake-snowpark-python', 'python-pptx')
 HANDLER = 'generate_ppt'
 EXECUTE AS CALLER
@@ -255,38 +255,41 @@ def generate_ppt(session: Session, account_id_input: str) -> str:
             label_para.font.color.rgb = RGBColor(100, 100, 100)
             label_para.alignment = PP_ALIGN.CENTER
         
-        # Save the presentation to a temporary file
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
-        temp_file_path = temp_file.name
-        temp_file.close()
-        
-        prs.save(temp_file_path)
-        
-        # Generate file name for stage
+        # Generate file name for stage using account name and datetime
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        stage_file_name = f"account_{account_id_input}_{timestamp}.pptx"
-        stage_path = f"@PPT_STAGE/{stage_file_name}"
+        # Sanitize account name for filename (replace spaces and special chars)
+        safe_account_name = account_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+        safe_account_name = ''.join(c for c in safe_account_name if c.isalnum() or c in ('_', '-'))
+        stage_file_name = f"{safe_account_name}_{timestamp}.pptx"
         
-        # Upload file to stage
-        session.file.put(
-            temp_file_path,
+        # Create temp directory and save with desired filename
+        temp_dir = tempfile.mkdtemp()
+        local_file_path = os.path.join(temp_dir, stage_file_name)
+        
+        # Save the presentation with the desired filename
+        prs.save(local_file_path)
+        
+        # Upload file to stage (will keep the filename)
+        put_result = session.file.put(
+            local_file_path,
             "@PPT_STAGE",
             auto_compress=False,
             overwrite=True
         )
         
-        # Clean up temp file
-        os.unlink(temp_file_path)
+        # Clean up temp file and directory
+        os.unlink(local_file_path)
+        os.rmdir(temp_dir)
         
-        # Generate pre-signed URL (valid for 24 hours = 86400 seconds)
+        # Generate pre-signed URL using the stage filename
         presigned_url_query = f"""
-            SELECT GET_PRESIGNED_URL(@PPT_STAGE, '{os.path.basename(temp_file_path)}', 86400) AS URL
+            SELECT GET_PRESIGNED_URL(@PPT_STAGE, '{stage_file_name}', 86400) AS URL
         """
         
         url_result = session.sql(presigned_url_query).collect()
         presigned_url = url_result[0]['URL']
         
-        return f"PowerPoint generated successfully! Download URL (valid for 24 hours): {presigned_url}"
+        return f"PowerPoint generated successfully for '{account_name}'! File: {stage_file_name} | Download URL (valid for 24 hours): {presigned_url}"
         
     except Exception as e:
         return f"Error generating PowerPoint: {str(e)}"

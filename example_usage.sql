@@ -54,7 +54,8 @@ LIST @PPT_STAGE;
 LIST @PPT_STAGE;
 
 -- Generate pre-signed URL for a specific file (replace with actual filename)
--- SELECT GET_PRESIGNED_URL(@PPT_STAGE, 'account_ACC001_20241027_120000.pptx', 86400) AS DOWNLOAD_URL;
+-- Note: Filenames now use account name instead of account ID
+-- SELECT GET_PRESIGNED_URL(@PPT_STAGE, 'Acme_Corporation_20241027_120000.pptx', 86400) AS DOWNLOAD_URL;
 
 -- ============================================================================
 -- Example 5: Clean up old PowerPoint files (optional)
@@ -89,7 +90,7 @@ CALL GENERATE_ACCOUNT_POWERPOINT('INVALID_ACCOUNT');
 -- ============================================================================
 
 -- To download a file using SnowSQL command line:
--- GET @PPT_STAGE/account_ACC001_20241027_120000.pptx file:///path/to/local/directory;
+-- GET @PPT_STAGE/Acme_Corporation_20241027_120000.pptx file:///path/to/local/directory;
 
 -- ============================================================================
 -- Example 8: View stage properties and configuration

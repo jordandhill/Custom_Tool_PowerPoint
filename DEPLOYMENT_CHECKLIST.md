@@ -177,9 +177,12 @@ Document key contacts for support:
 | Procedure not found | Re-run create_powerpoint_procedure.sql |
 | Permission denied | Grant appropriate permissions to role |
 | Python package error | Verify PACKAGES clause in procedure |
+| Python runtime error | Ensure using Python 3.10+ (3.8 is decommissioned) |
 | Stage not accessible | Check stage permissions and existence |
-| URL generation fails | Verify file uploaded to stage |
+| URL generation fails | Verify file uploaded to stage with correct name |
 | Empty PowerPoint | Check account data exists |
+| Corrupted file download | Ensure pre-signed URL references correct stage filename |
+| Filename issues | Filenames use format: AccountName_YYYYMMDD_HHMMSS.pptx |
 
 ---
 

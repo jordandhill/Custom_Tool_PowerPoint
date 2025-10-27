@@ -387,12 +387,53 @@ Potential improvements:
 - Export to other formats (PDF, Google Slides)
 - Integration with Snowflake Marketplace
 
+## Debugging and Troubleshooting
+
+If you encounter issues (especially file stream errors when using Snowflake Intelligence agents), use the comprehensive debugging tools provided.
+
+### Debug Tools
+
+1. **Debug Version of Procedure** (`create_powerpoint_procedure_debug.sql`)
+   ```sql
+   CALL GENERATE_ACCOUNT_POWERPOINT_DEBUG('ACC001');
+   SELECT * FROM DEBUG_LOGS ORDER BY LOG_TIMESTAMP DESC LIMIT 20;
+   ```
+
+2. **Diagnostic Procedures** (`diagnostic_procedures.sql`)
+   ```sql
+   CALL TEST_STAGE_ACCESS();           -- Test stage permissions
+   CALL TEST_FILE_OPERATIONS();        -- Test file I/O
+   CALL TEST_POWERPOINT_LIBRARY();     -- Test python-pptx
+   CALL TEST_COMPLETE_WORKFLOW('ACC001'); -- Test end-to-end
+   ```
+
+3. **Debugging Guide** (`DEBUGGING_GUIDE.md`)
+   - Comprehensive troubleshooting steps
+   - Common issues and solutions
+   - Agent-specific debugging
+   - Diagnostic information collection
+
+### Common Issues
+
+**File Stream Errors**: Usually caused by temp directory access or stage permissions
+- Run `CALL TEST_FILE_OPERATIONS();` to diagnose
+- Check stage permissions: `SHOW GRANTS ON STAGE PPT_STAGE;`
+- See DEBUGGING_GUIDE.md for detailed solutions
+
+**Agent Failures**: Works directly but fails through Snowflake Intelligence
+- Run debug version and compare logs
+- Verify user's default role is set correctly
+- Check agent configuration (warehouse, timeout, role access)
+
 ## Support
 
 For issues or questions:
-1. Check the troubleshooting section
-2. Review Snowflake documentation on Python stored procedures
-3. Consult python-pptx documentation for layout customization
+1. Run diagnostic procedures to identify the issue
+2. Check DEBUG_LOGS table for detailed execution information
+3. Review DEBUGGING_GUIDE.md for common issues
+4. Check the troubleshooting section
+5. Review Snowflake documentation on Python stored procedures
+6. Consult python-pptx documentation for layout customization
 
 ## License
 
@@ -400,6 +441,13 @@ This project is provided as-is for use within your Snowflake environment.
 
 ## Version History
 
+- **v1.0.7** (2024-10-27): **Debugging and Diagnostic Tools**
+  - Added debug version of procedure with comprehensive logging (`GENERATE_ACCOUNT_POWERPOINT_DEBUG`)
+  - Created DEBUG_LOGS table for execution tracking
+  - Added 4 diagnostic procedures to test individual components
+  - Created comprehensive DEBUGGING_GUIDE.md
+  - Addresses file stream errors in Snowflake Intelligence agents
+  - Step-by-step troubleshooting for agent-specific issues
 - **v1.0.6** (2024-10-27): **Role-Based Security Enhancement**
   - Changed from PUBLIC role to dedicated `SNOWFLAKE_INTELLIGENCE_RL` role
   - Enhanced security by limiting access to authorized users only

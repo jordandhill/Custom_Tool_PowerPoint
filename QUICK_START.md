@@ -44,6 +44,26 @@ You now have a working PowerPoint generation system in Snowflake.
 
 ---
 
+## 🐛 Troubleshooting
+
+If you encounter errors (especially when using Snowflake Intelligence agents):
+
+### Quick Diagnostics
+```sql
+-- Run diagnostic tests
+CALL TEST_STAGE_ACCESS();
+CALL TEST_FILE_OPERATIONS();
+CALL TEST_COMPLETE_WORKFLOW('ACC001');
+
+-- Run debug version
+CALL GENERATE_ACCOUNT_POWERPOINT_DEBUG('ACC001');
+SELECT * FROM DEBUG_LOGS ORDER BY LOG_TIMESTAMP DESC LIMIT 20;
+```
+
+See **DEBUGGING_QUICKSTART.md** for fast solutions or **DEBUGGING_GUIDE.md** for comprehensive troubleshooting.
+
+---
+
 ## Quick Reference
 
 ### Generate PowerPoint
@@ -84,10 +104,15 @@ Custom_Tool_PowerPoint/
 ├── QUICK_START.md                          # This file
 ├── setup_snowflake_objects.sql             # Step 1: Database setup
 ├── create_powerpoint_procedure.sql         # Step 2: Procedure creation
+├── create_powerpoint_procedure_debug.sql   # Debug version with logging
+├── diagnostic_procedures.sql               # 4 diagnostic test procedures
 ├── example_usage.sql                       # Step 3: Usage examples
 ├── snowflake_intelligence_integration.sql  # Snowflake Intelligence agent setup
 ├── streamlit_integration.py                # Streamlit app for UI
-└── PERMISSIONS_GUIDE.md                    # Complete permissions reference
+├── PERMISSIONS_GUIDE.md                    # Complete permissions reference
+├── USER_MANAGEMENT.md                      # User access management guide
+├── DEBUGGING_GUIDE.md                      # Comprehensive debugging guide
+└── DEBUGGING_QUICKSTART.md                 # Fast troubleshooting reference
 ```
 
 ---
